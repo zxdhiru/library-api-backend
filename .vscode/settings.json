@@ -1,0 +1,6 @@
+{
+    "terminal.explorerKind": "both",
+    "terminal.integrated.confirmOnKill": "never",
+    "terminal.integrated.copyOnSelection": true,
+    "window.autoDetectColorScheme": true
+}

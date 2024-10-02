@@ -1,0 +1,20 @@
+{
+  "name": "lms",
+  "version": "1.0.0",
+  "description": "Feature rich library management system",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch --env-file=.env server.js"
+  },
+  "keywords": [
+    "lms",
+    "library",
+    "management"
+  ],
+  "author": "Dhirendra Kumar Rana",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0",
+    "mongoose": "^8.6.3"
+  }
+}
