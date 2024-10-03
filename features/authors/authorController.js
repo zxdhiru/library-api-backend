@@ -15,10 +15,7 @@ const getAuthor = async (req, res) => {
 const getAuthorById = async (req, res) => {
     const { id } = req.params
     try {
-        const author = await Author.findById(id).populate({
-            path: 'books',
-            select: 'title originalPrice'
-        })
+        const author = await Author.findById(id).populate('books')
         if (!author) return sendError(res, 404, "Author not found")
         return sendResponse(res, 201, author)
     } catch (error) {
