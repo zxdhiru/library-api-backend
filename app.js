@@ -1,5 +1,6 @@
 const express = require('express');
 const { default: mongoose } = require('mongoose');
+const cors = require("cors")
 
 const app = express()
 app.use(express.json())
@@ -7,6 +8,9 @@ app.use((req, res, next) => {
     console.log(req.method, req.path, req.query);
     next()
 })
+
+app.use(cors())
+
 // Routes
 const bookRoute = require('./features/books/routes');
 app.use('/api/v1/books', bookRoute)
