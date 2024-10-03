@@ -3,7 +3,7 @@ const { sendError, sendResponse } = require('../../service/helperFunction')
 
 const getAuthor = async (req, res) => {
     try {
-        const author = await Author.find();
+        const author = await Author.find().populate("books")
         if (!author || author.length === 0) return sendError(res, 200, "No author available!");
         return sendResponse(res, 200, author);
     } catch (error) {

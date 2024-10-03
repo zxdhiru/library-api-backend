@@ -97,7 +97,7 @@ const getIssuedBookTransaction = async (req, res) => {
 }
 const getTransactions = async (req, res) => {
     try {
-        const transactions = await Transaction.find()
+        const transactions = await Transaction.find().populate("bookIds").populate("studentId")
         if (!transactions || transactions.length === 0) return sendError(res, 200, "No transactions available!");
         sendResponse(res, 200, transactions)
     } catch (error) {
