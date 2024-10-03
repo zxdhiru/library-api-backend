@@ -95,6 +95,15 @@ const getIssuedBookTransaction = async (req, res) => {
         return sendError(res, 404, "Something went wrong")
     }
 }
+const getTransactions = async (req, res) => {
+    try {
+        const transactions = await Transaction.find()
+        if (!transactions || transactions.length === 0) return sendError(res, 200, "No transactions available!");
+        sendResponse(res, 200, transactions)
+    } catch (error) {
+        sendError(res, 400, "Something went wrong")
+    }
+}
 
 const returnBooks = async (req, res) => {
     try {
@@ -152,5 +161,6 @@ const returnBooks = async (req, res) => {
 module.exports = {
     issueBooks,
     returnBooks,
+    getTransactions,
     getIssuedBookTransaction
 };

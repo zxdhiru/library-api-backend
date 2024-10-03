@@ -14,6 +14,8 @@ const studentRoute = require('./features/students/routes')
 app.use('/api/v1/students', studentRoute)
 const authorRoute = require('./features/authors/routes')
 app.use('/api/v1/authors', authorRoute)
+const transactionRoute = require('./features/transactions/routes')
+app.use('/api/v1/transactions', transactionRoute)
 
 
 // Connect to DB and start the server
