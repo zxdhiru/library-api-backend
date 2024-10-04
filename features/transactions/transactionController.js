@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 
 const issueBooks = async (req, res) => {
     try {
-        const { bookIds, studentId } = req.body;
+        const { bookIds, studentId, transactionType } = req.body;
         if (!bookIds || !studentId || !Array.isArray(bookIds)) {
             return sendError(res, 400, "Provide student Id and an array of BookIds");
         }
@@ -33,7 +33,7 @@ const issueBooks = async (req, res) => {
             if (book.stock <= 0) return sendError(res, 400, `Book with ID ${bookId} is out of stock`);
 
             // Check if the book is already issued to the same student
-            const existingTransaction = await Transaction.findOne({ bookId, studentId, returnDate: null });
+            const existingTransaction = await Transaction.findOne({ bookId, studentId, returnDate: null, transactionType });
             if (existingTransaction) {
                 return sendError(res, 400, `Book with ID ${bookId} is already issued to this student`);
             }
@@ -60,6 +60,7 @@ const issueBooks = async (req, res) => {
             studentId,
             dueDate,
             issueDate: new Date(),
+            transactionType
         });
 
         return sendResponse(res, 201, { student, issuedBooks, transaction });
@@ -125,40 +126,42 @@ const getTransactions = async (req, res) => {
 
 const returnBooks = async (req, res) => {
     try {
-        const { bookIds } = req.body;
+        const { bookIds, transactionType } = req.body;
         if (!bookIds || !Array.isArray(bookIds)) {
             return sendError(res, 400, "Provide array of BookIds");
         }
 
+        if (!['returned'].includes(transactionType)) {
+            return sendError(res, 400, "Invalid transaction type");
+        }
+
         const returnedBooks = [];
 
-        for (const bookId of bookIds) {
+        await Promise.all(bookIds.map(async (bookId) => {
             if (!mongoose.Types.ObjectId.isValid(bookId)) {
-                return sendError(res, 400, `Invalid book ID: ${bookId}`);
+                throw new Error(`Invalid book ID: ${bookId}`);
             }
 
-            const transaction = await Transaction.findOne({ bookIds });
-            if (!transaction) return sendError(res, 404, `Transaction for book ID ${bookId} not found`);
+            const transaction = await Transaction.findOne({ bookIds: { $in: [bookId] }, returnDate: null });
+            if (!transaction) throw new Error(`Transaction for book ID ${bookId} not found`);
 
             const book = await Book.findById(bookId);
-            if (!book) return sendError(res, 404, `Book with ID ${bookId} not found`);
+            if (!book) throw new Error(`Book with ID ${bookId} not found`);
 
             const student = await Student.findById(transaction.studentId);
-            if (!student) return sendError(res, 404, `Student with ID ${transaction.studentId} not found`);
+            if (!student) throw new Error(`Student with ID ${transaction.studentId} not found`);
 
             const bookIndex = book.issuedBy.indexOf(transaction.studentId);
             if (bookIndex > -1) {
-                // Update the book stock and issuedBy array
                 book.stock += 1;
                 book.issuedBy.splice(bookIndex, 1);
                 await book.save();
             }
 
-            // Set the return date on the transaction
             transaction.returnDate = new Date();
+            transaction.transactionType = transactionType;
             await transaction.save();
 
-            // Remove the book from the student's booksIssued array
             const studentBookIndex = student.booksIssued.indexOf(bookId);
             if (studentBookIndex > -1) {
                 student.booksIssued.splice(studentBookIndex, 1);
@@ -166,12 +169,12 @@ const returnBooks = async (req, res) => {
             }
 
             returnedBooks.push({ book });
-        }
+        }));
 
         return sendResponse(res, 201, "Books returned successfully", returnedBooks);
     } catch (error) {
-        console.error(error);
-        return sendError(res, 500, "Something went wrong");
+        console.error(error.message);
+        return sendError(res, 500, error.message || "Something went wrong");
     }
 };
 
