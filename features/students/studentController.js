@@ -27,7 +27,7 @@ const getStudents = async (req, res) => {
 const getStudentById = async (req, res) => {
     const { id } = req.params
     try {
-        const student = await Student.findById(id)
+        const student = await Student.findById(id).populate("booksIssued")
         if (!student) return sendError(res, 404, "Student not found")
         return sendResponse(res, 201, student)
     } catch (error) {

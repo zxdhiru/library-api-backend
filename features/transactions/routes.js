@@ -5,7 +5,7 @@ const { issueBooks, returnBooks, getIssuedBookTransaction, getTransactions } = r
 const transactionRouter = Router()
 
 transactionRouter.get('/', getTransactions);
-transactionRouter.get('/return', getIssuedBookTransaction);
+transactionRouter.get('/:bookId', getIssuedBookTransaction);
 transactionRouter.post('/issue', issueBooks);
 transactionRouter.post('/return', returnBooks);
 

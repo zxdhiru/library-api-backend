@@ -1,4 +1,4 @@
-const { Schema, model, default: mongoose } = require("mongoose");
+const { Schema, model } = require("mongoose");
 
 const transactionSchema = new Schema({
     bookIds: {
@@ -22,8 +22,14 @@ const transactionSchema = new Schema({
     returnDate: {
         type: Date,
         default: null
+    },
+    transactionType: {
+        type: String,
+        enum: ['issued', 'returned'], // Restrict values to 'issued' or 'returned'
+        required: true // Make this field required
     }
 }, { timestamps: true });
 
 const Transaction = model('Transaction', transactionSchema);
+
 module.exports = Transaction;

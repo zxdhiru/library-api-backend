@@ -71,30 +71,48 @@ const issueBooks = async (req, res) => {
 
 
 const getIssuedBookTransaction = async (req, res) => {
-    const { bookIds } = req.body
-    if (!bookIds || !Array.isArray(bookIds)) return sendError(res, 400, "Provide array of BookIds");
-    const issuedBooks = []
+    const { bookId } = req.params; // Get the bookId from request parameters
+    if (!bookId) return sendError(res, 400, "Provide BookId");
+
     try {
-        for (const bookId of bookIds) {
-            const transaction = await Transaction.findOne({ bookIds })
-            const book = await Book.findById(bookId)
-            const student = await Student.findById(transaction.studentId)
-            const issueDetail = {
-                book: book.title,
-                student: student.name,
+        // Find all transactions that include the specified bookId
+        const transactions = await Transaction.find({ bookIds: bookId }); // Ensure that 'bookIds' is the correct field name
+        // If no transactions are found
+        if (!transactions.length) {
+            return sendResponse(res, 404, "No transactions found for this book.");
+        }
+
+        // Filter transactions to exclude those with null returnDate
+        const validTransactions = transactions.filter(transaction => transaction.returnDate == null);
+
+        // Map through the valid transactions to get detailed information
+        const issueDetails = await Promise.all(validTransactions.map(async (transaction) => {
+            const book = await Book.findById(transaction.bookIds)
+            const student = await Student.findById(transaction.studentId); // Get student details
+
+            return {
+                book: book.name, // If bookIds is an array, you might need to adjust this based on your structure
+                student: student ? student.name : "Unknown Student", // Handle case where student may not exist
                 issueDate: transaction.issueDate,
                 dueDate: transaction.dueDate,
+                returnDate: transaction.returnDate,
                 transactionId: transaction._id
-            }
-            issuedBooks.push(issueDetail)
-        }
-        console.log(issuedBooks);
+            };
+        }));
 
-        return sendResponse(res, 200, issuedBooks)
+        // If no valid transactions are found after filtering
+        if (!issueDetails.length) {
+            return sendResponse(res, 404, { message: "No issued transactions found for this book." });
+        }
+
+        return sendResponse(res, 200, issueDetails); // Send all issue details in response
     } catch (error) {
-        return sendError(res, 404, "Something went wrong")
+        console.error("Error fetching transactions:", error); // Log the error for debugging
+        return sendError(res, 500, "Something went wrong"); // Send a generic error message
     }
-}
+};
+
+
 const getTransactions = async (req, res) => {
     try {
         const transactions = await Transaction.find().populate("bookIds").populate("studentId")

@@ -40,7 +40,7 @@ const bookSchema = new Schema({
     type: [Schema.Types.ObjectId],
     ref: 'Student'
   }
-}, { timestamps: true });
+}, { timestamps: true, strictPopulate: false });
 
 // Create and export the Product model
 const Book = model("Book", bookSchema);

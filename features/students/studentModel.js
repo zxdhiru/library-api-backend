@@ -34,7 +34,7 @@ const studentSchema = new Schema({
     ref: 'Book',
     default: []
   }
-}, { timestamps: true });
+}, { timestamps: true, strictPopulate: false });
 
 // Create and export the Product model
 const Student = model("Student", studentSchema);

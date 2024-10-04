@@ -54,7 +54,7 @@ const getBooks = async (req, res) => {
 const getBookById = async (req, res) => {
     const { id } = req.params
     try {
-        const book = await Book.findById(id).populate('author').populate("issuedBy")
+        const book = await Book.findById(id).populate('author').populate("issuedBy").populate("booksIssued")
         if (!book) return sendError(res, 404, "Book not found")
         return sendResponse(res, 201, book)
     } catch (error) {
