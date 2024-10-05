@@ -70,41 +70,37 @@ const issueBooks = async (req, res) => {
     }
 };
 
-
 const getIssuedBookTransaction = async (req, res) => {
     const { bookId } = req.params; // Get the bookId from request parameters
     if (!bookId) return sendError(res, 400, "Provide BookId");
 
     try {
-        // Find all transactions that include the specified bookId
-        const transactions = await Transaction.find({ bookIds: bookId }); // Ensure that 'bookIds' is the correct field name
+        // Find all transactions that include the specified bookId and have the transactionType 'issued'
+        const transactions = await Transaction.find({ bookIds: bookId, transactionType: 'issued' }); // Filter by transactionType: 'issued'
+
         // If no transactions are found
         if (!transactions.length) {
             return sendResponse(res, 404, "No transactions found for this book.");
         }
 
-        // Filter transactions to exclude those with null returnDate
-        const validTransactions = transactions.filter(transaction => transaction.returnDate == null);
+        // Map through the transactions to get detailed information
+        const issueDetails = await Promise.all(transactions.map(async (transaction) => {
+            const book = await Book.findById(transaction.bookIds); // Assuming bookIds is an array, adjust accordingly
+            console.log(book);
 
-        // Map through the valid transactions to get detailed information
-        const issueDetails = await Promise.all(validTransactions.map(async (transaction) => {
-            const book = await Book.findById(transaction.bookIds)
             const student = await Student.findById(transaction.studentId); // Get student details
 
             return {
-                book: book.name, // If bookIds is an array, you might need to adjust this based on your structure
-                student: student ? student.name : "Unknown Student", // Handle case where student may not exist
+                book: book ? book.title : "Unknown Book", // Handle missing book
+                student: student ? student.name : "Unknown Student", // Handle missing student
+                studentId: student ? student._id : "N/A", // Handle missing student
+                phone: student ? student.phone : "N/A", // Handle missing student
                 issueDate: transaction.issueDate,
                 dueDate: transaction.dueDate,
                 returnDate: transaction.returnDate,
                 transactionId: transaction._id
             };
         }));
-
-        // If no valid transactions are found after filtering
-        if (!issueDetails.length) {
-            return sendResponse(res, 404, { message: "No issued transactions found for this book." });
-        }
 
         return sendResponse(res, 200, issueDetails); // Send all issue details in response
     } catch (error) {

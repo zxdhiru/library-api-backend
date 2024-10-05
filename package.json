@@ -4,7 +4,8 @@
   "description": "Feature rich library management system",
   "main": "server.js",
   "scripts": {
-    "dev": "node --watch --env-file=.env server.js"
+    "dev": "node --watch --env-file=.env server.js",
+    "start": "node --env-file=.env server.js"
   },
   "keywords": [
     "lms",
