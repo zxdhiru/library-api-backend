@@ -1,4 +1,5 @@
-const PORT = process.env.PORT 
+require("dotenv").config()
+const PORT = process.env.PORT
 const MONGOOSE_URL = process.env.MONGOOSE_URL
 
 module.exports = {
