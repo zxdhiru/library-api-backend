@@ -173,11 +173,32 @@ const returnBooks = async (req, res) => {
         return sendError(res, 500, error.message || "Something went wrong");
     }
 };
+const getTransactionDetails = async (req, res) => {
+    const { transactionId } = req.params;  // Get the transaction ID from the request parameters
+    try {
+        // Find transaction by ID
+        const transaction = await Transaction.findById(transactionId)
+            .populate("bookIds")  // Populate related book details if needed
+            .populate("studentId");  // Populate related student details if needed
+
+        // If no transaction is found, return 404
+        if (!transaction) {
+            return sendError(res, 404, "Transaction not found!"); 
+        }
+
+        // Send successful response with transaction details
+        sendResponse(res, 200, transaction);
+    } catch (error) {
+        console.error("Error fetching transaction:", error); // Log error for debugging
+        sendError(res, 500, "Something went wrong while fetching transaction details.");
+    }
+};
 
 
 module.exports = {
     issueBooks,
     returnBooks,
     getTransactions,
+    getTransactionDetails,
     getIssuedBookTransaction
 };
