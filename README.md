@@ -27,12 +27,12 @@ You need to have Node.js and npm installed on your system. You can download them
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/library-management-system.git
+   git clone https://github.com/your-username/library-api-backend.git
 
 
 2. Navigate to the project directory:
 
-cd library-management-system
+cd library-api-backend
 
 
 3. Install dependencies:
@@ -44,7 +44,7 @@ npm install
 
 npm start
 
-The server will be running at http://localhost:3000.
+The server will be running at http://localhost:8000.
 
 
 
